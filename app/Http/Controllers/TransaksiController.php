@@ -49,17 +49,23 @@ class TransaksiController extends Controller
             $transaksi->save();
 
             $total_harga = 0;
-            for ($i = 1; $i <= 3; $i++){
+
+            foreach ($request->input('nama_produk') as $index => $nama_produk) {
                 $transaksidetail = new TransaksiDetail();
                 $transaksidetail->id_transaksi = $transaksi->id;
-                $transaksidetail->nama_produk = $request->input('nama_produk'.$i);
-                $transaksidetail->harga_satuan = $request->input('harga_satuan'.$i);
-                $transaksidetail->jumlah = $request->input('jumlah'.$i);
-                $transaksidetail->subtotal = $request->input('harga_satuan'.$i)*$request->input('jumlah'.$i);
-                $total_harga += $transaksidetail->subtotal;
+                $transaksidetail->nama_produk = $nama_produk;
+                $transaksidetail->harga_satuan = $request->input('harga_satuan')[$index];
+                $transaksidetail->jumlah = $request->input('jumlah')[$index];
+                $transaksidetail->subtotal = $transaksidetail->harga_satuan * $transaksidetail->jumlah;
+                $transaksidetail->save();
+
+                $total_harga += $transaksidetail->subtotal; // Tambahkan ke total harga
             }
             $transaksi->total_harga = $total_harga;
             $transaksi->kembalian = $transaksi->bayar - $total_harga;
+            $transaksi->save();
+
+            DB::commit();
 
             return redirect('transaksidetail/'.$transaksi->id)->with('pesan', 'Berhasil menambahkan data');
         } catch (\Exception $e) {
@@ -71,7 +77,8 @@ class TransaksiController extends Controller
     public function edit($id)
     {
         $transaksi = Transaksi::findOrFail($id);
-        return view('transaksi.edit',);
+        $transaksi_details = TransaksiDetail::where('id_transaksi', $id)->get();
+        return view('transaksi.edit', compact('transaksi', 'transaksi_details'));
     }
 
     public function update(Request $request, $id)

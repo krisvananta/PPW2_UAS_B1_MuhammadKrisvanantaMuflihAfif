@@ -15,18 +15,18 @@
                     <div class="mb-3 row">
                         <label for="email" class="col-md-4 col-form-label text-md-end text-start">Email Address</label>
                         <div class="col-md-6">
-                            <input type="email" class="form-control @error('') is-invalid @enderror" name="" value="{{ old('') }}">
-                            @if ($errors->has(''))
-                                <span class="text-danger">{{ $errors->first('') }}</span>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}">
+                            @if ($errors->has('email'))
+                                <span class="text-danger">{{ $errors->first('email') }}</span>
                             @endif
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label for="password" class="col-md-4 col-form-label text-md-end text-start">Password</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control @error('') is-invalid @enderror" name="">
-                            @if ($errors->has(''))
-                                <span class="text-danger">{{ $errors->first('') }}</span>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" required>
+                            @if ($errors->has('password'))
+                                <span class="text-danger">{{ $errors->first('pasword') }}</span>
                             @endif
                         </div>
                     </div>

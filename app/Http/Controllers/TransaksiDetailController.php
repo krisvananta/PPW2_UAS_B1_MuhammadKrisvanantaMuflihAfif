@@ -14,20 +14,20 @@ class TransaksiDetailController extends Controller
     {
         $transaksidetail = TransaksiDetail::with('transaksi')->orderBy('id','DESC')->get();
 
-        return view('transaksidetail.index', );
+        return view('transaksidetail.index', compact('transaksidetail'));
     }
 
     public function detail(Request $request)
     {
         $transaksi = Transaksi::with('transaksidetail')->findOrFail($request->id_transaksi);
 
-        return view('transaksidetail.detail', );
+        return view('transaksidetail.detail', compact('transaksi'));
     }
 
     public function edit($id)
     {
         $transaksidetail = TransaksiDetail::findOrFail($id);
-        return view('transaksidetail.edit', );
+        return view('transaksidetail.edit', compact('transaksidetail'));
     }
 
     public function update(Request $request, $id)
@@ -59,7 +59,7 @@ class TransaksiDetailController extends Controller
             return redirect('transaksidetail/'.$transaksidetail->id_transaksi)->with('pesan', 'Berhasil mengubah data');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->withErrors(['Transaction' => 'Gagal menambahkan data'])->withInput();
+            return redirect()->back()->withErrors(['Transaction' => 'Gagal menambahkan data: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -69,16 +69,20 @@ class TransaksiDetailController extends Controller
         try {
 
             $transaksidetail = TransaksiDetail::findOrFail($id);
-
             $transaksi = Transaksi::with('transaksidetail')->findOrFail($transaksidetail->id_transaksi);
-            $transaksi->total_harga = $transaksi->transaksidetail->sum('subtotal');
-            $transaksi->kembalian = $transaksi->bayar - $transaksi->total_harga;
-            $transaksi->save();
+
+            $transaksidetail->delete();
+
+            $transaksi->total_harga = $transaksi->transaksidetail->sum('subtotal'); // Hitung total harga
+            $transaksi->kembalian = $transaksi->bayar - $transaksi->total_harga; // Hitung kembalian
+            $transaksi->save(); 
+
+            DB::commit();
 
             return redirect('transaksidetail/'.$transaksidetail->id_transaksi)->with('pesan', 'Berhasil menghapus data');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->withErrors(['Transaction' => 'Gagal menghapus data'])->withInput();
+            return redirect()->back()->withErrors(['Transaction' => 'Gagal menghapus data: ' . $e->getMessage()])->withInput();
         }
     }
 }
